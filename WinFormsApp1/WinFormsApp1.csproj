@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DevExpress.Data" Version="25.1.3" />
+    <PackageReference Include="DevExpress.Win.Grid" Version="25.1.3" />
+    <PackageReference Include="DevExpress.Win.Navigation" Version="25.1.3" />
+    <PackageReference Include="DevExpress.Win.Scheduler" Version="25.1.3" />
+    <PackageReference Include="DevExpress.Win.WinterJoySkin" Version="1.0.3" />
+    <PackageReference Include="DevExpress.Xpo.es" Version="25.1.3" />
+    <PackageReference Include="DevExpress.Xpo.Extensions" Version="25.1.3" />
+    <PackageReference Include="DevExpressMvvm" Version="24.1.6" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+  </ItemGroup>
+
+</Project>
