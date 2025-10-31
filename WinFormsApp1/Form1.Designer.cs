@@ -7,6 +7,7 @@ using WinFormsApp1.Data;
 using WinFormsApp1.Database;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraScheduler.Drawing;
 namespace WinFormsApp1
 {
     partial class Form1
@@ -37,6 +38,7 @@ namespace WinFormsApp1
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             Label label1;
             Label label2;
             Label label3;
@@ -48,6 +50,9 @@ namespace WinFormsApp1
             DevExpress.XtraScheduler.TimeRuler timeRuler1 = new DevExpress.XtraScheduler.TimeRuler();
             DevExpress.XtraScheduler.TimeRuler timeRuler2 = new DevExpress.XtraScheduler.TimeRuler();
             DevExpress.XtraScheduler.TimeRuler timeRuler3 = new DevExpress.XtraScheduler.TimeRuler();
+            DevExpress.XtraScheduler.TimeRuler timeRuler4 = new DevExpress.XtraScheduler.TimeRuler();
+            DevExpress.XtraScheduler.TimeRuler timeRuler5 = new DevExpress.XtraScheduler.TimeRuler();
+            DevExpress.XtraScheduler.TimeRuler timeRuler6 = new DevExpress.XtraScheduler.TimeRuler();
             button1 = new Button();
             listView1 = new ListView();
             listView2 = new ListView();
@@ -75,7 +80,10 @@ namespace WinFormsApp1
             dropDownButton2 = new DropDownButton();
             dropDownButton1 = new DropDownButton();
             tabPage4 = new TabPage();
+            schedulerControl2 = new DevExpress.XtraScheduler.SchedulerControl();
+            schedulerDataStorage1 = new DevExpress.XtraScheduler.SchedulerDataStorage(components);
             schedulerControl1 = new DevExpress.XtraScheduler.SchedulerControl();
+            calendarControl1 = new DevExpress.XtraEditors.Controls.CalendarControl();
             label1 = new Label();
             label2 = new Label();
             label3 = new Label();
@@ -88,7 +96,11 @@ namespace WinFormsApp1
             tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridControl1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)gridView1).BeginInit();
+            tabPage4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)schedulerControl2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)schedulerDataStorage1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)schedulerControl1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)calendarControl1.CalendarTimeProperties).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -224,6 +236,7 @@ namespace WinFormsApp1
             // 
             // tabPage2
             // 
+            tabPage2.Controls.Add(calendarControl1);
             tabPage2.Controls.Add(dateTimePicker2);
             tabPage2.Controls.Add(button1);
             tabPage2.Controls.Add(textBox2);
@@ -296,7 +309,7 @@ namespace WinFormsApp1
             tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(795, 426);
+            tabPage1.Size = new Size(192, 72);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Rezervacijos";
             tabPage1.UseVisualStyleBackColor = true;
@@ -361,7 +374,7 @@ namespace WinFormsApp1
             tabPage3.Controls.Add(dropDownButton1);
             tabPage3.Location = new Point(4, 24);
             tabPage3.Name = "tabPage3";
-            tabPage3.Size = new Size(795, 426);
+            tabPage3.Size = new Size(192, 72);
             tabPage3.TabIndex = 2;
             tabPage3.Text = "Vietų pridėjimas";
             tabPage3.UseVisualStyleBackColor = true;
@@ -439,24 +452,72 @@ namespace WinFormsApp1
             // 
             // tabPage4
             // 
+            tabPage4.AccessibleName = "Rezervacijų kalendorius";
+            tabPage4.Controls.Add(schedulerControl2);
             tabPage4.Location = new Point(4, 24);
             tabPage4.Name = "tabPage4";
             tabPage4.Padding = new Padding(3);
             tabPage4.Size = new Size(795, 426);
             tabPage4.TabIndex = 3;
-            tabPage4.Text = "tabPage4";
+            tabPage4.Text = "Rezervacijų kalendorius";
             tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // schedulerControl2
+            // 
+            schedulerControl2.DataStorage = schedulerDataStorage1;
+            schedulerControl2.Location = new Point(3, 3);
+            schedulerControl2.Name = "schedulerControl2";
+            schedulerControl2.Size = new Size(786, 412);
+            schedulerControl2.Start = new DateTime(2025, 10, 31, 0, 0, 0, 0);
+            schedulerControl2.TabIndex = 0;
+            schedulerControl2.Text = "schedulerControl2";
+            schedulerControl2.Views.DayView.TimeRulers.Add(timeRuler1);
+            schedulerControl2.Views.FullWeekView.Enabled = true;
+            schedulerControl2.Views.FullWeekView.TimeRulers.Add(timeRuler2);
+            schedulerControl2.Views.WorkWeekView.TimeRulers.Add(timeRuler3);
+            schedulerControl2.Views.YearView.UseOptimizedScrolling = false;
+            // 
+            // schedulerDataStorage1
+            // 
+            // 
+            // 
+            // 
+            schedulerDataStorage1.AppointmentDependencies.AutoReload = false;
+            // 
+            // 
+            // 
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(0, "None", "&None", SystemColors.Window);
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(1, "Important", "&Important", Color.FromArgb(255, 194, 190));
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(2, "Business", "&Business", Color.FromArgb(168, 213, 255));
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(3, "Personal", "&Personal", Color.FromArgb(193, 244, 156));
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(4, "Vacation", "&Vacation", Color.FromArgb(243, 228, 199));
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(5, "Must Attend", "Must &Attend", Color.FromArgb(244, 206, 147));
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(6, "Travel Required", "&Travel Required", Color.FromArgb(199, 244, 255));
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(7, "Needs Preparation", "&Needs Preparation", Color.FromArgb(207, 219, 152));
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(8, "Birthday", "&Birthday", Color.FromArgb(224, 207, 233));
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(9, "Anniversary", "&Anniversary", Color.FromArgb(141, 233, 223));
+            schedulerDataStorage1.Appointments.Labels.CreateNewLabel(10, "Phone Call", "Phone &Call", Color.FromArgb(255, 247, 165));
             // 
             // schedulerControl1
             // 
             schedulerControl1.Location = new Point(0, 0);
             schedulerControl1.Name = "schedulerControl1";
+            schedulerControl1.Size = new Size(400, 200);
             schedulerControl1.Start = new DateTime(2025, 10, 31, 0, 0, 0, 0);
             schedulerControl1.TabIndex = 0;
-            schedulerControl1.Views.DayView.TimeRulers.Add(timeRuler1);
-            schedulerControl1.Views.FullWeekView.TimeRulers.Add(timeRuler2);
-            schedulerControl1.Views.WorkWeekView.TimeRulers.Add(timeRuler3);
+            schedulerControl1.Views.DayView.TimeRulers.Add(timeRuler4);
+            schedulerControl1.Views.FullWeekView.TimeRulers.Add(timeRuler5);
+            schedulerControl1.Views.WorkWeekView.TimeRulers.Add(timeRuler6);
             schedulerControl1.Views.YearView.UseOptimizedScrolling = false;
+            // 
+            // calendarControl1
+            // 
+            calendarControl1.CalendarTimeEditing = DevExpress.Utils.DefaultBoolean.True;
+            calendarControl1.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] { new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo) });
+            calendarControl1.Location = new Point(305, 35);
+            calendarControl1.Name = "calendarControl1";
+            calendarControl1.Size = new Size(352, 235);
+            calendarControl1.TabIndex = 13;
             // 
             // Form1
             // 
@@ -476,7 +537,11 @@ namespace WinFormsApp1
             tabPage3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)gridControl1).EndInit();
             ((System.ComponentModel.ISupportInitialize)gridView1).EndInit();
+            tabPage4.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)schedulerControl2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)schedulerDataStorage1).EndInit();
             ((System.ComponentModel.ISupportInitialize)schedulerControl1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)calendarControl1.CalendarTimeProperties).EndInit();
             ResumeLayout(false);
         }
 
@@ -515,5 +580,8 @@ namespace WinFormsApp1
         private TextBox textBox4;
         private TabPage tabPage4;
         private DevExpress.XtraScheduler.SchedulerControl schedulerControl1;
+        private DevExpress.XtraScheduler.SchedulerControl schedulerControl2;
+        private DevExpress.XtraScheduler.SchedulerDataStorage schedulerDataStorage1;
+        private DevExpress.XtraEditors.Controls.CalendarControl calendarControl1;
     }
 }

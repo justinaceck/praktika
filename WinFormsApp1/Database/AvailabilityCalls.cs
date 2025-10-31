@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.Design;
 using System.Xml;
+using DevExpress.CodeParser;
+using DevExpress.XtraGrid.Views.Base.ViewInfo;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using WinFormsApp1.Data;
@@ -163,6 +165,18 @@ namespace WinFormsApp1.Database
             deleteold.Parameters.Add("@HallID", System.Data.SqlDbType.Int);
             deleteold.Parameters["@HallID"].Value = hallid;
             deleteold.ExecuteNonQuery();
+        }
+        internal static void InsertAvailability(DateTime start, DateTime end, int HallID)
+        {
+            SqlCommand insertend = new SqlCommand("InsertAvailability", myConnection);
+            insertend.CommandType = System.Data.CommandType.StoredProcedure;
+            insertend.Parameters.Add("@End", System.Data.SqlDbType.DateTime);
+            insertend.Parameters["@End"].Value = end;
+            insertend.Parameters.Add("@Start", System.Data.SqlDbType.DateTime);
+            insertend.Parameters["@Start"].Value = start;
+            insertend.Parameters.Add("@HallID", System.Data.SqlDbType.Int);
+            insertend.Parameters["@HallID"].Value = HallID;
+            insertend.ExecuteNonQuery();
         }
     }
 }

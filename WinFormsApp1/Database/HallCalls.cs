@@ -44,6 +44,7 @@ namespace WinFormsApp1.Database
             hallcommand.Parameters.Add("@TicketLimit", System.Data.SqlDbType.Int);
             hallcommand.Parameters["@TicketLimit"].Value = Convert.ToInt32(hall.ChildNodes[2].InnerText);
             hallcommand.ExecuteNonQuery();
+            AvailabilityCalls.InsertAvailability(DateTime.Now, DateTime.Now.AddYears(20), Convert.ToInt32(hall.ChildNodes[0].InnerText));
         }
         //Iš duomenų bazės paima Hall ir grąžina jų sąrašą
         internal static List<Hall> GetHalls()

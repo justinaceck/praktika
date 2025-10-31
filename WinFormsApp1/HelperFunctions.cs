@@ -14,6 +14,7 @@ using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraPrinting;
 using DevExpress.XtraRichEdit.Model.History;
+using DevExpress.XtraScheduler;
 using WinFormsApp1.Data;
 using WinFormsApp1.Database;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -57,6 +58,37 @@ namespace WinFormsApp1
                 item.SubItems.Add(eventh.EventId.ToString());
                 item.SubItems.Add(eventh.HallId.ToString());
                 view.Items.Add(item);
+            }
+        }
+        internal static void UpdateEventList(ListView view, int Hallid)
+        {
+            List<Event> events = EventCalls.GetEventsByHallID(Hallid);
+            foreach (Event eventh in events)
+            {
+                ListViewItem item = new ListViewItem(new string(eventh.Name + " " + eventh.StartTime));
+                item.SubItems.Add(eventh.EventId.ToString());
+                item.SubItems.Add(eventh.HallId.ToString());
+                view.Items.Add(item);
+            }
+        }
+        //Atnaujina rodomą renginių sąrašą
+        internal static void UpdateEventCalender(SchedulerDataStorage storage, SchedulerControl control)
+        {
+            List<Event> events = EventCalls.GetEvents();
+            List<Hall> halls = HallCalls.GetHalls();
+            foreach (Hall hall in halls)
+            {
+                Resource resource = storage.CreateResource(hall.HallID);
+                resource.Caption = hall.Name;
+                storage.Resources.Add(resource);
+            }
+            control.GroupType = SchedulerGroupType.Resource;
+
+            foreach (Event eventh in events)
+            {
+                Appointment newApp = storage.CreateAppointment(DevExpress.XtraScheduler.AppointmentType.Normal, Convert.ToDateTime(eventh.StartTime), Convert.ToDateTime(eventh.EndTime), eventh.Name);
+                newApp.ResourceId = eventh.HallId;
+                storage.Appointments.Add(newApp);
             }
         }
         //Atnaujina rodomą vietų sąrašą renginių lange

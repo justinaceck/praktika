@@ -11,6 +11,7 @@ using System.Data;
 using System.Diagnostics;
 using DevExpress.XtraRichEdit.Model;
 using System.Text.RegularExpressions;
+using DevExpress.XtraScheduler;
 
 namespace WinFormsApp1
 {
@@ -39,6 +40,7 @@ namespace WinFormsApp1
         //Nuskaito paduotà failà ir pakvieèia funkcijas, kurios sukeliai informacijà á duomenø bazæ
         private void button1_Click(object sender, EventArgs e)
         {
+            listView1.Clear();
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "XML files | *.xml"; // file types, that will be allowed to upload
             dialog.Multiselect = false; // allow/deny user to upload more than one file at a time
@@ -82,7 +84,7 @@ namespace WinFormsApp1
                 ListView.SelectedListViewItemCollection hall = listView1.SelectedItems;
                 int hallid = Convert.ToInt32(hall[0].SubItems[1].Text);
                 HelperFunctions.UpdateGroupList(hallid, listView2);
-                HelperFunctions.UpdateEventList(listView4);
+                HelperFunctions.UpdateEventList(listView4, hallid);
             }
         }
         //Iðvalo vietø sàraðà ir tada atnaujina já pagal pasirinktà grupæ renginiø lange
@@ -132,6 +134,12 @@ namespace WinFormsApp1
             {
                 UpdateHallList();
             }
+            else if (tabControl1.SelectedTab.Text == "Rezervacijø kalendorius")
+            {
+                schedulerDataStorage1.Appointments.Clear();
+                HelperFunctions.UpdateEventCalender(schedulerDataStorage1, schedulerControl2);
+
+            }
         }
         //Duomenø bazëje paþymëtø vietø IsReserved kintamàjá pakeièia á 1 (vieta rezervuota) ir atnaujina rodomà vietø sàraðà
         private void button2_Click(object sender, EventArgs e)
@@ -156,7 +164,7 @@ namespace WinFormsApp1
                 EventCalls.InsertEvent(textBox2.Text, dateTimePicker1.Text, dateTimePicker2.Text, Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text));
                 AvailabilityCalls.UpdateAvailabilty(Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text), dateTimePicker1.Value, dateTimePicker2.Value);
                 listView4.Items.Clear();
-                HelperFunctions.UpdateEventList(listView4);
+                HelperFunctions.UpdateEventList(listView4, Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text));
             }
             else
             {
@@ -202,7 +210,7 @@ namespace WinFormsApp1
         {
             // synchronize selection
             dropDownButton1.Text = ((DXMenuItem)sender).Caption;
-            
+
             UpdateGroupList(Convert.ToInt32(((DXMenuItem)sender).Tag));
             // ... do something specific
         }
@@ -261,7 +269,7 @@ namespace WinFormsApp1
             }
             else MessageBox.Show("Patikrinkite ar viskas ávesta teisingai");
         }
-        private DXMenuItem group; 
+        private DXMenuItem group;
         private void GridView1_CellValueChanged(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
         {
             this.gridView1.CloseEditor();
@@ -303,7 +311,7 @@ namespace WinFormsApp1
             if ((seatid = HallSeatCalls.FindSeatID(Convert.ToInt32(group.Tag), row, rowletter, number, numberletter)) < 0)
                 HallSeatCalls.InsertHallSeat(Convert.ToInt32(group.Tag), price, row, rowletter, number, numberletter);
             else HallSeatCalls.UpdatePrice(seatid, price);
-                this.gridView1.UpdateCurrentRow();
+            this.gridView1.UpdateCurrentRow();
             //this.ServiceStatusTableAdapter.Update(this.adventureWorks2012DataSet.AssetManagerDatabaseDataSet);
         }
 

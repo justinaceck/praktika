@@ -49,6 +49,25 @@ namespace WinFormsApp1.Database
                 return ParseReadEvents(reader);
             }
         }
+        internal static List<Event> GetEventsByHallID(int hallid)
+        {
+            SqlCommand select = new SqlCommand("GetEventsByHallID", myConnection);
+            select.CommandType = System.Data.CommandType.StoredProcedure;
+            select.Parameters.Add("@hallID", System.Data.SqlDbType.Int);
+            select.Parameters["@hallID"].Value = hallid;
+            IAsyncResult result = select.BeginExecuteReader();
+            int count = 0;
+            while (!result.IsCompleted)
+            {
+                count += 1;
+                Debug.WriteLine("Waiting ({0})", count);
+            }
+
+            using (SqlDataReader reader = select.EndExecuteReader(result))
+            {
+                return ParseReadEvents(reader);
+            }
+        }
         //Padedančioji funkcija, kuri paima nuskaitytą duomenų bazės informaciją ir ją paverčia į Event struktūros listą
         private static List<Event> ParseReadEvents(SqlDataReader reader)
         {

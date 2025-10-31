@@ -1,2 +1,11 @@
 *.json
 *.vsidx
+*.dll
+*.pdb
+*.exe
+*.v2
+*.cache
+*.pdb
+*.dll
+*.txt
+*.cache
