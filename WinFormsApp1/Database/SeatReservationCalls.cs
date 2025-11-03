@@ -8,6 +8,7 @@ using System.Windows.Forms.Design;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using WinFormsApp1.Data;
+using WinFormsApp1.Helper;
 
 namespace WinFormsApp1.Database
 {
@@ -33,6 +34,7 @@ namespace WinFormsApp1.Database
                 Debug.WriteLine("Failed: ", ex.ToString());
             }
         }
+        //Patikrina ar vieta rezervuota renginyje(nenaudojama)
         internal static bool IsReserved(int seatid, int eventid)
         {
             SqlCommand select = new SqlCommand("IsReserved", myConnection);
@@ -60,6 +62,7 @@ namespace WinFormsApp1.Database
                 catch { return false; }
             }
         }
+        //Sukuria naują vietos rezervaciją
         internal static void AddReservation(int eventid, int seatid)
         {
             SqlCommand select = new SqlCommand("InsertReservation", myConnection);
@@ -70,9 +73,10 @@ namespace WinFormsApp1.Database
             select.Parameters["@eventid"].Value = eventid;
             select.ExecuteNonQuery();
         }
+        //Jeigu vieta rezervuota gražina 1, jeigu ne 0
         internal static int FindSeat(int eventid, string seat)
         {
-            HallSeatCalls.ParseSeat(seat, out string groupname, out int row, out char rowletter, out int number, out char numberletter);
+			ParsingFunctions.ParseSeat(seat, out string groupname, out int row, out char rowletter, out int number, out char numberletter);
             SqlCommand select = new SqlCommand("FindSeat", myConnection);
             select.CommandType = System.Data.CommandType.StoredProcedure;
             select.Parameters.Add("@eventid", System.Data.SqlDbType.Int);

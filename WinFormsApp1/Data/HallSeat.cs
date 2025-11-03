@@ -11,17 +11,15 @@ namespace WinFormsApp1.Data
         public int HallGroupID { get; private set; }
         public int ShowSeatID { get; private set; }
         public string Color { get; private set; }
-        public double Price { get; private set; }
         public int SeatRow { get; private set; }
         public char SeatRowLetter { get; private set; }
         public int SeatNumber { get; private set; }
         public char SeatNumberLetter { get; private set; }
-        public HallSeat(int hallGroupID, int showSeatID, string color, double price, int seatRow, char seatRowLetter, int seatNumber, char seatNumberLetter)
+        public HallSeat(int hallGroupID, int showSeatID, string color, int seatRow, char seatRowLetter, int seatNumber, char seatNumberLetter)
         {
             HallGroupID = hallGroupID;
             ShowSeatID = showSeatID;
             Color = color;
-            Price = price;
             SeatRow = seatRow;
             SeatRowLetter = seatRowLetter;
             SeatNumber = seatNumber;

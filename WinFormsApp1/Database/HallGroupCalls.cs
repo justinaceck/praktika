@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Data.SqlClient;
 using WinFormsApp1.Data;
+using WinFormsApp1.Helper;
 
 namespace WinFormsApp1.Database
 {
@@ -64,31 +65,19 @@ namespace WinFormsApp1.Database
 
             using (SqlDataReader reader = select.EndExecuteReader(result))
             {
-                return ParseReadGroups(reader, hallid);
+                return ParsingFunctions.ParseReadGroups(reader, hallid);
             }
         }
-        //Padedančioji funkcija, kuri paima nuskaitytą duomenų bazės informaciją ir ją paverčia į HallGroup struktūros listą
-        private static List<HallGroup> ParseReadGroups(SqlDataReader reader, int hallid)
-        {
-            List<HallGroup> groups = new List<HallGroup>();
-            // Display the data within the reader.
-            while (reader.Read())
-            {
-                int id = Convert.ToInt32(reader.GetValue(1));
-                string name = reader.GetValue(2).ToString();
-                int az = Convert.ToInt32(reader.GetValue(3));
-                HallGroup group = new HallGroup(hallid, id, name, az);
-                groups.Add(group);
-            }
-            return groups;
-        }
-        internal static int GetGroupID(string groupname)
+        //Gražina grupės id pagal grupės pavadinimą ir salės id
+        internal static int GetGroupID(string groupname, int hallid)
         {
             SqlCommand select = new SqlCommand("GetGroupID", myConnection);
             select.CommandType = System.Data.CommandType.StoredProcedure;
             select.Parameters.Add("@name", System.Data.SqlDbType.VarChar, 50);
             select.Parameters["@name"].Value = groupname;
-            IAsyncResult result = select.BeginExecuteReader();
+			select.Parameters.Add("@hallid", System.Data.SqlDbType.Int);
+			select.Parameters["@hallid"].Value = hallid;
+			IAsyncResult result = select.BeginExecuteReader();
             int count = 0;
             while (!result.IsCompleted)
             {
@@ -99,7 +88,7 @@ namespace WinFormsApp1.Database
             using (SqlDataReader reader = select.EndExecuteReader(result))
             {
                 reader.Read();
-                return Convert.ToInt32(reader.GetValue(1));
+                return Convert.ToInt32(reader.GetValue(0));
             }
         }
     }
