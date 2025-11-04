@@ -15,7 +15,10 @@ namespace WinFormsApp1.Data
         public char SeatRowLetter { get; private set; }
         public int SeatNumber { get; private set; }
         public char SeatNumberLetter { get; private set; }
-        public HallSeat(int hallGroupID, int showSeatID, string color, int seatRow, char seatRowLetter, int seatNumber, char seatNumberLetter)
+        public double Price { get; private set; }
+        public int Extra { get; private set; }
+
+        public HallSeat(int hallGroupID, int showSeatID, string color, int seatRow, char seatRowLetter, int seatNumber, char seatNumberLetter, double price, int extra )
         {
             HallGroupID = hallGroupID;
             ShowSeatID = showSeatID;
@@ -24,6 +27,8 @@ namespace WinFormsApp1.Data
             SeatRowLetter = seatRowLetter;
             SeatNumber = seatNumber;
             SeatNumberLetter = seatNumberLetter;
+            Price = price;
+            Extra = extra;
         }
         //tostring method with all the row and number, but also hallname for identification
         public string ToString(string group)

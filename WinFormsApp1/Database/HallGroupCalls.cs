@@ -68,8 +68,28 @@ namespace WinFormsApp1.Database
                 return ParsingFunctions.ParseReadGroups(reader, hallid);
             }
         }
-        //Gražina grupės id pagal grupės pavadinimą ir salės id
-        internal static int GetGroupID(string groupname, int hallid)
+		//Iš duomenų bazės paima HallGroup ir grąžina jų sąrašą
+		internal static List<HallGroup> GetGroupsByEvent(int eventid)
+		{
+			SqlCommand select = new SqlCommand("GetGroupsByEventID", myConnection);
+			select.CommandType = System.Data.CommandType.StoredProcedure;
+			select.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
+			select.Parameters["@eventid"].Value = eventid;
+			IAsyncResult result = select.BeginExecuteReader();
+			int count = 0;
+			while (!result.IsCompleted)
+			{
+				count += 1;
+				Debug.WriteLine("Waiting ({0})", count);
+			}
+
+			using (SqlDataReader reader = select.EndExecuteReader(result))
+			{
+				return ParsingFunctions.ParseReadGroups(reader);
+			}
+		}
+		//Gražina grupės id pagal grupės pavadinimą ir salės id
+		internal static int GetGroupID(string groupname, int hallid)
         {
             SqlCommand select = new SqlCommand("GetGroupID", myConnection);
             select.CommandType = System.Data.CommandType.StoredProcedure;

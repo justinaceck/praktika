@@ -38,7 +38,7 @@ namespace WinFormsApp1.Database
 			}
 		}
 		//Įkelia HallSeat parametrus į duomenų bazę
-		internal static void InsertHallSeat(int hallgroupid, string color, int seatrow, char seatrowletter, int seatnumber, char seatnumberletter)
+		internal static void InsertHallSeat(int hallgroupid, string color, int seatrow, char seatrowletter, int seatnumber, char seatnumberletter, double price, int extra)
 		{
 			SqlCommand seatcommand = new SqlCommand("InsertHallSeat", myConnection);
 			seatcommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -54,6 +54,10 @@ namespace WinFormsApp1.Database
 			seatcommand.Parameters["@SeatNumber"].Value = seatnumber;
 			seatcommand.Parameters.Add("@SeatNumberLetter", System.Data.SqlDbType.VarChar, 1);
 			seatcommand.Parameters["@SeatNumberLetter"].Value = seatnumberletter;
+			seatcommand.Parameters.Add("@Price", System.Data.SqlDbType.Real);
+			seatcommand.Parameters["@Price"].Value = price;
+			seatcommand.Parameters.Add("@Extra", System.Data.SqlDbType.Int);
+			seatcommand.Parameters["@Extra"].Value = extra;
 			seatcommand.ExecuteNonQuery();
 		}
 		//Iš duomenų bazės paima HallSeat pagal HallGroupID ir grąžina jų sąrašą
@@ -126,16 +130,18 @@ namespace WinFormsApp1.Database
 			using (SqlDataReader reader = select.EndExecuteReader(result))
 			{
 				reader.Read();
-				SeatReservationCalls.AddReservation(eventid, Convert.ToInt32(reader.GetValue(1)));
+				SeatReservationCalls.UpdateReservation(eventid, Convert.ToInt32(reader.GetValue(1)), 1, DateTime.Now);
 			}
 		}
 		//Pagal HallGroupID iš duomenų bazės paima visus grupės numerius
-		internal static List<string> GetSeatNumbers(int hallgroupid)
+		internal static List<string> GetSeatNumbers(int hallgroupid, int eventid)
 		{
 			SqlCommand select = new SqlCommand("GetDistinctColumnNumbers", myConnection);
 			select.CommandType = System.Data.CommandType.StoredProcedure;
 			select.Parameters.Add("@groupid", System.Data.SqlDbType.Int);
 			select.Parameters["@groupid"].Value = hallgroupid;
+			select.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
+			select.Parameters["@eventid"].Value = eventid;
 			IAsyncResult result = select.BeginExecuteReader();
 			int count = 0;
 			while (!result.IsCompleted)
@@ -159,12 +165,14 @@ namespace WinFormsApp1.Database
 			}
 		}
 		//Pagal HallGroupID iš duomenų bazės paima visas grupės eiles
-		internal static void GetSeatRows(int hallgroupid, out List<string> rows, out List<string> rowletters)
+		internal static void GetSeatRows(int hallgroupid, out List<string> rows, out List<string> rowletters, int eventid)
 		{
 			SqlCommand select = new SqlCommand("GetDistinctRowNumbers", myConnection);
 			select.CommandType = System.Data.CommandType.StoredProcedure;
 			select.Parameters.Add("@groupid", System.Data.SqlDbType.Int);
 			select.Parameters["@groupid"].Value = hallgroupid;
+			select.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
+			select.Parameters["@eventid"].Value = eventid;
 			IAsyncResult result = select.BeginExecuteReader();
 			int count = 0;
 			while (!result.IsCompleted)
@@ -184,7 +192,7 @@ namespace WinFormsApp1.Database
 			}
 		}
 		//Iš duomenų bazės paima visos eilės informaciją
-		internal static void GetRowData(int hallgroupid, string row, char rowletter, out List<string> columns, out List<double> prices)
+		internal static void GetRowData(int hallgroupid, string row, char rowletter, out List<string> columns, out List<double> prices, int eventid)
 		{
 			SqlCommand select = new SqlCommand("GetRowData", myConnection);
 			select.CommandType = System.Data.CommandType.StoredProcedure;
@@ -194,6 +202,8 @@ namespace WinFormsApp1.Database
 			select.Parameters["@row"].Value = Convert.ToInt32(row);
 			select.Parameters.Add("@rowletter", System.Data.SqlDbType.VarChar, 1);
 			select.Parameters["@rowletter"].Value = Convert.ToChar(rowletter);
+			select.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
+			select.Parameters["@eventid"].Value = eventid;
 			IAsyncResult result = select.BeginExecuteReader();
 			int count = 0;
 			while (!result.IsCompleted)
@@ -248,7 +258,7 @@ namespace WinFormsApp1.Database
 			}
 		}
 		//Atnaujina vietos kainą FUCKED
-		internal static void UpdatePrice(int seatid, double price)
+		internal static void UpdatePrice(int seatid, double price, int eventid)
 		{
 			SqlCommand seatcommand = new SqlCommand("UpdatePrice", myConnection);
 			seatcommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -256,6 +266,8 @@ namespace WinFormsApp1.Database
 			seatcommand.Parameters["@seatid"].Value = seatid;
 			seatcommand.Parameters.Add("@price", System.Data.SqlDbType.Real);
 			seatcommand.Parameters["@price"].Value = price;
+			seatcommand.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
+			seatcommand.Parameters["@eventid"].Value = eventid;
 			seatcommand.ExecuteNonQuery();
 		}
 	}

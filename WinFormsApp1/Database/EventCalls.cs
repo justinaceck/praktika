@@ -85,6 +85,33 @@ namespace WinFormsApp1.Database
 			select.Parameters["@EndTime"].Value = end;
 			select.ExecuteNonQuery();
 		}
+
+		internal static int FindEvent(string name, string start, string end, int hallid)
+		{
+			SqlCommand select = new SqlCommand("FindEvent", myConnection);
+			select.CommandType = System.Data.CommandType.StoredProcedure;
+			select.Parameters.Add("@Name", System.Data.SqlDbType.VarChar, 50);
+			select.Parameters["@Name"].Value = name;
+			select.Parameters.Add("@HallID", System.Data.SqlDbType.Int);
+			select.Parameters["@HallID"].Value = hallid;
+			select.Parameters.Add("@StartTime", System.Data.SqlDbType.DateTime);
+			select.Parameters["@StartTime"].Value = start;
+			select.Parameters.Add("@EndTime", System.Data.SqlDbType.DateTime);
+			select.Parameters["@EndTime"].Value = end;
+			IAsyncResult result = select.BeginExecuteReader();
+			int count = 0;
+			while (!result.IsCompleted)
+			{
+				count += 1;
+				Debug.WriteLine("Waiting ({0})", count);
+			}
+
+			using (SqlDataReader reader = select.EndExecuteReader(result))
+			{
+				reader.Read();
+				return Convert.ToInt32(reader.GetValue(0));
+			}
+		}
 		//Randa renginio salės id
 		internal static int GetHallID(int eventid)
 		{

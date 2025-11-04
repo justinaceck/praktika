@@ -56,14 +56,16 @@ namespace WinFormsApp1.Database
                     reader.Read();
                 try
                 {
-                    reader.GetValue(0);
+                    if (Convert.ToInt32(reader.GetValue(0)) == 1)
                     return true;
+                    else
+                    return false;
                 }
                 catch { return false; }
             }
         }
         //Sukuria naują vietos rezervaciją
-        internal static void AddReservation(int eventid, int seatid)
+        internal static void AddReservation(int eventid, int seatid, int reserved, DateTime time, double price)
         {
             SqlCommand select = new SqlCommand("InsertReservation", myConnection);
             select.CommandType = System.Data.CommandType.StoredProcedure;
@@ -71,10 +73,30 @@ namespace WinFormsApp1.Database
             select.Parameters["@seatid"].Value = seatid;
             select.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
             select.Parameters["@eventid"].Value = eventid;
-            select.ExecuteNonQuery();
+			select.Parameters.Add("@reserved", System.Data.SqlDbType.Bit);
+			select.Parameters["@reserved"].Value = reserved;
+			select.Parameters.Add("@time", System.Data.SqlDbType.DateTime);
+			select.Parameters["@time"].Value = time;
+			select.Parameters.Add("@price", System.Data.SqlDbType.Real);
+			select.Parameters["@price"].Value = price;
+			select.ExecuteNonQuery();
         }
-        //Jeigu vieta rezervuota gražina 1, jeigu ne 0
-        internal static int FindSeat(int eventid, string seat)
+		internal static void UpdateReservation(int eventid, int seatid, int reserved, DateTime time)
+		{
+			SqlCommand select = new SqlCommand("UpdateReservation", myConnection);
+			select.CommandType = System.Data.CommandType.StoredProcedure;
+			select.Parameters.Add("@seatid", System.Data.SqlDbType.Int);
+			select.Parameters["@seatid"].Value = seatid;
+			select.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
+			select.Parameters["@eventid"].Value = eventid;
+			select.Parameters.Add("@reserved", System.Data.SqlDbType.Bit);
+			select.Parameters["@reserved"].Value = reserved;
+			select.Parameters.Add("@time", System.Data.SqlDbType.DateTime);
+			select.Parameters["@time"].Value = time;
+			select.ExecuteNonQuery();
+		}
+		//Jeigu vieta rezervuota gražina 1, jeigu ne 0
+		internal static int FindSeat(int eventid, string seat)
         {
 			ParsingFunctions.ParseSeat(seat, out string groupname, out int row, out char rowletter, out int number, out char numberletter);
             SqlCommand select = new SqlCommand("FindSeat", myConnection);
@@ -103,7 +125,7 @@ namespace WinFormsApp1.Database
             {
                 reader.Read();
                 if (reader.GetValue(0) == DBNull.Value) return 0;
-                else return 1;
+                else return Convert.ToInt32(reader.GetValue(0));
             }
         }
 

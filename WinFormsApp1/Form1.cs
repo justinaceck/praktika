@@ -14,12 +14,17 @@ using System.Text.RegularExpressions;
 using DevExpress.XtraScheduler;
 using WinFormsApp1.Helper;
 using System.Windows.Forms;
+using DevExpress.Utils;
+using DevExpress.XtraGrid.Views.Base.ViewInfo;
+using Microsoft.Extensions.Logging;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace WinFormsApp1
 {
 	public partial class Form1 : Form
 	{
 		private DXMenuItem group; //Pagalbinis kintamasis, kuris parodo, kuri grupë pasirinkta vietø pridëjimo lange
+		private DXMenuItem eventh; //Pagalbinis kintamasis, kuris parodo, kuris renginys pasirinktas vietø pridëjimo lange
 								  //Paleidimo funkcija
 		public Form1()
 		{
@@ -158,6 +163,8 @@ namespace WinFormsApp1
 			if (textBox2.Text != string.Empty && listView1.SelectedItems.Count == 1 && dateTimePicker1.Value < dateTimePicker2.Value && AvailabilityCalls.IsAvailable(Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text), dateTimePicker1.Value, dateTimePicker2.Value) != null)
 			{
 				EventCalls.InsertEvent(textBox2.Text, dateTimePicker1.Text, dateTimePicker2.Text, Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text));
+				int eventid = EventCalls.FindEvent(textBox2.Text, dateTimePicker1.Text, dateTimePicker2.Text, Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text));
+				HelperFunctions.AddAllSeatsToEvent(Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text), eventid);
 				UpdateFunctions.UpdateAvailabilty(Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text), dateTimePicker1.Value, dateTimePicker2.Value);
 				listView4.Items.Clear();
 				UpdateFunctions.UpdateEventList(listView4, Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text));
@@ -187,12 +194,12 @@ namespace WinFormsApp1
 		//Atnaujina saliø sàraðà vietø pridëjimo lange
 		internal void UpdateHallList()
 		{
-			List<Hall> halls = HallCalls.GetHalls();
+			List<Event> events = EventCalls.GetEvents();
 			DXPopupMenu popupMenu = new DXPopupMenu();
-			popupMenu.Items.Add(new DXMenuItem() { Caption = "Pasirinkite salæ", Tag = "-1" });
-			foreach (Hall hall in halls)
+			popupMenu.Items.Add(new DXMenuItem() { Caption = "Pasirinkite renginá", Tag = "-1" });
+			foreach (Event eventh in events)
 			{
-				popupMenu.Items.Add(new DXMenuItem() { Caption = hall.Name, Tag = hall.HallID });
+				popupMenu.Items.Add(new DXMenuItem() { Caption = eventh.Name, Tag = eventh.EventId });
 			}
 			dropDownButton1.DropDownControl = popupMenu;
 			foreach (DXMenuItem item in popupMenu.Items)
@@ -207,12 +214,14 @@ namespace WinFormsApp1
 		internal void item_Click(object sender, EventArgs e)
 		{
 			dropDownButton1.Text = ((DXMenuItem)sender).Caption;
+			gridView1.Columns.Clear();
+			eventh = (DXMenuItem)sender;
 			UpdateGroupList(Convert.ToInt32(((DXMenuItem)sender).Tag));
 		}
 		//Atnaujina grupiø sàraðà vietø pridëjimo lange
-		internal void UpdateGroupList(int hallid)
+		internal void UpdateGroupList(int eventid)
 		{
-			List<HallGroup> groups = HallGroupCalls.GetGroups(hallid);
+			List<HallGroup> groups = HallGroupCalls.GetGroupsByEvent(eventid);
 			DXPopupMenu popupMenu = new DXPopupMenu();
 			popupMenu.Items.Add(new DXMenuItem() { Caption = "Pasirinkite grupæ", Tag = "-1" });
 			foreach (HallGroup group in groups)
@@ -233,7 +242,7 @@ namespace WinFormsApp1
 			dropDownButton2.Text = ((DXMenuItem)sender).Caption;
 			gridView1.Columns.Clear();
 			group = (DXMenuItem)sender;
-			UpdateFunctions.UpdateSeatList(Convert.ToInt32(((DXMenuItem)sender).Tag), gridView1);
+			UpdateFunctions.UpdateSeatList(Convert.ToInt32(((DXMenuItem)sender).Tag), gridView1, Convert.ToInt32(eventh.Tag));
 		}
 		//Patikrina ar eilës pavadinimas teisingas, tada prideda eilæ prie vietø sàraðo
 		private void button5_Click_1(object sender, EventArgs e)
@@ -278,8 +287,12 @@ namespace WinFormsApp1
 			catch { MessageBox.Show("Patikrinkite ar viskas ávesta teisingai"); return; }
 			int seatid;
 			if ((seatid = HallSeatCalls.FindSeatID(Convert.ToInt32(group.Tag), row, rowletter, number, numberletter)) < 0)
-				HallSeatCalls.InsertHallSeat(Convert.ToInt32(group.Tag)," ", row, rowletter, number, numberletter);//to be set when i figure out the color stuff
-			else HallSeatCalls.UpdatePrice(seatid, price);
+			{
+				HallSeatCalls.InsertHallSeat(Convert.ToInt32(group.Tag), " ", row, rowletter, number, numberletter, price, Convert.ToInt32(eventh.Tag));//to be set when i figure out the color stuff
+				seatid = HallSeatCalls.FindSeatID(Convert.ToInt32(group.Tag), row, rowletter, number, numberletter);
+				SeatReservationCalls.AddReservation(Convert.ToInt32(eventh.Tag), seatid, 0, DateTime.Now, price);
+			}
+			else HallSeatCalls.UpdatePrice(seatid, price, Convert.ToInt32(eventh.Tag));
 			this.gridView1.UpdateCurrentRow();
 		}
 		internal void HideUnusedControls(DevExpress.XtraScheduler.UI.AppointmentForm form)
@@ -298,8 +311,6 @@ namespace WinFormsApp1
 			form.Controls[0].Controls.RemoveAt(2);
 			form.Controls[0].Controls.RemoveAt(2);
 			form.Controls[0].Controls[2].Visible= false;
-			Debug.WriteLine(form.Controls);
-
 		}
 	}
 }

@@ -80,8 +80,8 @@ namespace WinFormsApp1
 			tabPage4 = new TabPage();
 			schedulerControl2 = new SchedulerControl();
 			schedulerDataStorage1 = new SchedulerDataStorage(components);
-			schedulerControl1 = new SchedulerControl();
 			tabPage5 = new TabPage();
+			schedulerControl1 = new SchedulerControl();
 			label1 = new Label();
 			label2 = new Label();
 			label3 = new Label();
@@ -509,15 +509,50 @@ namespace WinFormsApp1
 			// 
 			// 
 			// 
-			// 
-			// schedulerControl1
-			// 
-			schedulerControl1.AllowDrop = false;
-			schedulerControl1.Location = new Point(0, 0);
-			schedulerControl1.Name = "schedulerControl1";
-			schedulerControl1.Start = new DateTime(2025, 11, 3, 0, 0, 0, 0);
-			schedulerControl1.TabIndex = 0;
-			schedulerControl1.Views.YearView.UseOptimizedScrolling = false;
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(SystemColors.Window, "None", "&None"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(255, 194, 190), "Important", "&Important"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(168, 213, 255), "Business", "&Business"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(193, 244, 156), "Personal", "&Personal"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(243, 228, 199), "Vacation", "&Vacation"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(244, 206, 147), "Must Attend", "Must &Attend"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(199, 244, 255), "Travel Required", "&Travel Required"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(207, 219, 152), "Needs Preparation", "&Needs Preparation"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(224, 207, 233), "Birthday", "&Birthday"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(141, 233, 223), "Anniversary", "&Anniversary"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(255, 247, 165), "Phone Call", "Phone &Call"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(SystemColors.Window, "None", "&None"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(255, 194, 190), "Important", "&Important"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(168, 213, 255), "Business", "&Business"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(193, 244, 156), "Personal", "&Personal"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(243, 228, 199), "Vacation", "&Vacation"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(244, 206, 147), "Must Attend", "Must &Attend"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(199, 244, 255), "Travel Required", "&Travel Required"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(207, 219, 152), "Needs Preparation", "&Needs Preparation"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(224, 207, 233), "Birthday", "&Birthday"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(141, 233, 223), "Anniversary", "&Anniversary"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(255, 247, 165), "Phone Call", "Phone &Call"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(SystemColors.Window, "None", "&None"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(255, 194, 190), "Important", "&Important"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(168, 213, 255), "Business", "&Business"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(193, 244, 156), "Personal", "&Personal"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(243, 228, 199), "Vacation", "&Vacation"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(244, 206, 147), "Must Attend", "Must &Attend"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(199, 244, 255), "Travel Required", "&Travel Required"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(207, 219, 152), "Needs Preparation", "&Needs Preparation"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(224, 207, 233), "Birthday", "&Birthday"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(141, 233, 223), "Anniversary", "&Anniversary"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(255, 247, 165), "Phone Call", "Phone &Call"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(SystemColors.Window, "None", "&None"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(255, 194, 190), "Important", "&Important"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(168, 213, 255), "Business", "&Business"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(193, 244, 156), "Personal", "&Personal"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(243, 228, 199), "Vacation", "&Vacation"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(244, 206, 147), "Must Attend", "Must &Attend"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(199, 244, 255), "Travel Required", "&Travel Required"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(207, 219, 152), "Needs Preparation", "&Needs Preparation"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(224, 207, 233), "Birthday", "&Birthday"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(141, 233, 223), "Anniversary", "&Anniversary"));
+			schedulerDataStorage1.Appointments.Labels.Add(new AppointmentLabel(Color.FromArgb(255, 247, 165), "Phone Call", "Phone &Call"));
 			// 
 			// tabPage5
 			// 
@@ -528,6 +563,15 @@ namespace WinFormsApp1
 			tabPage5.TabIndex = 4;
 			tabPage5.Text = "Vietų rezervacijos kalendorius";
 			tabPage5.UseVisualStyleBackColor = true;
+			// 
+			// schedulerControl1
+			// 
+			schedulerControl1.AllowDrop = false;
+			schedulerControl1.Location = new Point(0, 0);
+			schedulerControl1.Name = "schedulerControl1";
+			schedulerControl1.Start = new DateTime(2025, 11, 3, 0, 0, 0, 0);
+			schedulerControl1.TabIndex = 0;
+			schedulerControl1.Views.YearView.UseOptimizedScrolling = false;
 			// 
 			// Form1
 			// 
@@ -596,5 +640,7 @@ namespace WinFormsApp1
         private DevExpress.XtraScheduler.SchedulerControl schedulerControl2;
         private DevExpress.XtraScheduler.SchedulerDataStorage schedulerDataStorage1;
 		private TabPage tabPage5;
+		private SchedulerControl schedulerControl3;
+		private SchedulerControl schedulerControl4;
 	}
 }
