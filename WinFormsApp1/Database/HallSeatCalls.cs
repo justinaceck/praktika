@@ -101,6 +101,26 @@ namespace WinFormsApp1.Database
 				return ParsingFunctions.ParseReadSeats(reader, eventid);
 			}
 		}
+		internal static List<string> GetSeatsWithPriceByEvent(int eventid, out List<string> Group, out List<double> price)
+		{
+			List<string> seats = new List<string>();
+			SqlCommand select = new SqlCommand("GetSeatsWithPrice", myConnection);
+			select.CommandType = System.Data.CommandType.StoredProcedure;
+			select.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
+			select.Parameters["@eventid"].Value = eventid;
+			IAsyncResult result = select.BeginExecuteReader();
+			int count = 0;
+			while (!result.IsCompleted)
+			{
+				count += 1;
+				Debug.WriteLine("Waiting ({0})", count);
+			}
+
+			using (SqlDataReader reader = select.EndExecuteReader(result))
+			{
+				return ParsingFunctions.ParseReadSeat(reader, eventid, out Group, out price);
+			}
+		}
 		//Atnaujina vietos rezervacijos statusą į rezervuotą
 		internal static void MarkReserved(string seat, int eventid)
 		{
@@ -257,7 +277,7 @@ namespace WinFormsApp1.Database
 				else return -1;
 			}
 		}
-		//Atnaujina vietos kainą FUCKED
+		//Atnaujina vietos kainą
 		internal static void UpdatePrice(int seatid, double price, int eventid)
 		{
 			SqlCommand seatcommand = new SqlCommand("UpdatePrice", myConnection);
@@ -269,6 +289,45 @@ namespace WinFormsApp1.Database
 			seatcommand.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
 			seatcommand.Parameters["@eventid"].Value = eventid;
 			seatcommand.ExecuteNonQuery();
+		}
+		internal static void UpdateSeat(int GroupID, int row, char rowletter, int number, char numberletter, int seatid)
+		{
+			SqlCommand seatcommand = new SqlCommand("UpdateSeat", myConnection);
+			seatcommand.CommandType = System.Data.CommandType.StoredProcedure;
+			seatcommand.Parameters.Add("@seatid", System.Data.SqlDbType.Int);
+			seatcommand.Parameters["@seatid"].Value = seatid;
+			seatcommand.Parameters.Add("@groupid", System.Data.SqlDbType.Int);
+			seatcommand.Parameters["@groupid"].Value = GroupID;
+			seatcommand.Parameters.Add("@row", System.Data.SqlDbType.Int);
+			seatcommand.Parameters["@row"].Value = row;
+			seatcommand.Parameters.Add("@rowletter", System.Data.SqlDbType.VarChar, 1);
+			seatcommand.Parameters["@rowletter"].Value = rowletter;
+			seatcommand.Parameters.Add("@number", System.Data.SqlDbType.Int);
+			seatcommand.Parameters["@number"].Value = number;
+			seatcommand.Parameters.Add("@numberletter", System.Data.SqlDbType.Int);
+			seatcommand.Parameters["@numberletter"].Value = numberletter;
+			seatcommand.ExecuteNonQuery();
+		}
+		internal static int GetSeatExtra(int seatid)
+		{
+			SqlCommand seatcommand = new SqlCommand("GetSeatExtraByID", myConnection);
+			seatcommand.CommandType = System.Data.CommandType.StoredProcedure;
+			seatcommand.Parameters.Add("@seatid", System.Data.SqlDbType.Int);
+			seatcommand.Parameters["@seatid"].Value = seatid;
+			IAsyncResult result = seatcommand.BeginExecuteReader();
+			int count = 0;
+			while (!result.IsCompleted)
+			{
+				count += 1;
+				Debug.WriteLine("Waiting ({0})", count);
+			}
+			using (SqlDataReader reader = seatcommand.EndExecuteReader(result))
+			{
+
+				if (reader.Read())
+					return Convert.ToInt32(reader.GetValue(0));
+				else return -1;
+			}
 		}
 	}
 }

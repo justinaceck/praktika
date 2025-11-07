@@ -18,6 +18,10 @@ using DevExpress.Utils;
 using DevExpress.XtraGrid.Views.Base.ViewInfo;
 using Microsoft.Extensions.Logging;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using DevExpress.Mvvm.Native;
+using DevExpress.XtraEditors.Repository;
+using DevExpress.PivotGrid.PivotQuery;
+using static DevExpress.XtraEditors.SyntaxEditor.HtmlMarkupHighlighter;
 
 namespace WinFormsApp1
 {
@@ -25,7 +29,8 @@ namespace WinFormsApp1
 	{
 		private DXMenuItem group; //Pagalbinis kintamasis, kuris parodo, kuri grupë pasirinkta vietø pridëjimo lange
 		private DXMenuItem eventh; //Pagalbinis kintamasis, kuris parodo, kuris renginys pasirinktas vietø pridëjimo lange
-								  //Paleidimo funkcija
+		private DataTable dataTable;
+		//Paleidimo funkcija
 		public Form1()
 		{
 			InitializeComponent();
@@ -37,7 +42,9 @@ namespace WinFormsApp1
 			SeatReservationCalls.ConnectToDB();
 			UpdateFunctions.UpdateHallList(listView1);
 			checkedListBox1.CheckOnClick = true;
-
+			checkedListBox1.Dock = DockStyle.Fill;
+			schedulerControl2.Start = DateTime.Now;
+			schedulerControl4.Start = DateTime.Now;
 		}
 		//Nuskaito paduotà failà ir pakvieèia funkcijas, kurios sukeliai informacijà á duomenø bazæ
 		private void button1_Click(object sender, EventArgs e)
@@ -134,14 +141,23 @@ namespace WinFormsApp1
 			}
 			else if (tabControl1.SelectedTab.Text == "Vietø pridëjimas")
 			{
-				UpdateHallList();
+				UpdateEventList();
+			}
+			else if (tabControl1.SelectedTab.Text == "Vietø rezervacijos kalendorius")
+			{
+				schedulerDataStorage2.Appointments.Clear();
+				schedulerDataStorage2.Resources.Clear();
+				UpdateFunctions.UpdateReservationCalender(schedulerDataStorage2, schedulerControl4);
 			}
 			else if (tabControl1.SelectedTab.Text == "Rezervacijø kalendorius")
 			{
 				schedulerDataStorage1.Appointments.Clear();
 				schedulerDataStorage1.Resources.Clear();
 				UpdateFunctions.UpdateEventCalender(schedulerDataStorage1, schedulerControl2);
-
+			}
+			else if (tabControl1.SelectedTab.Text == "Kitas vietø pridëjimas")
+			{
+				UpdateEventList1();
 			}
 		}
 		//Duomenø bazëje sukuria paþymëtø vietø rezervacijà ir atnaujina rodomà vietø sàraðà
@@ -157,23 +173,6 @@ namespace WinFormsApp1
 				UpdateFunctions.UpdateSeatList(checkedListBox1, Convert.ToInt32(listView7.SelectedItems[0].SubItems[1].Text));
 			}
 		}
-		//Jeigu yra ávestas pavadinimas, pasirinkta salë ir laikas yra teisingas prideda á duomenø bazæ naujà renginá
-		private void button3_Click(object sender, EventArgs e)
-		{
-			if (textBox2.Text != string.Empty && listView1.SelectedItems.Count == 1 && dateTimePicker1.Value < dateTimePicker2.Value && AvailabilityCalls.IsAvailable(Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text), dateTimePicker1.Value, dateTimePicker2.Value) != null)
-			{
-				EventCalls.InsertEvent(textBox2.Text, dateTimePicker1.Text, dateTimePicker2.Text, Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text));
-				int eventid = EventCalls.FindEvent(textBox2.Text, dateTimePicker1.Text, dateTimePicker2.Text, Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text));
-				HelperFunctions.AddAllSeatsToEvent(Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text), eventid);
-				UpdateFunctions.UpdateAvailabilty(Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text), dateTimePicker1.Value, dateTimePicker2.Value);
-				listView4.Items.Clear();
-				UpdateFunctions.UpdateEventList(listView4, Convert.ToInt32(listView1.SelectedItems[0].SubItems[1].Text));
-			}
-			else
-			{
-				MessageBox.Show("Patikrinkite ar suvesta informacija teisinga");
-			}
-		}
 		//Ávedus tikslø vietos pavadinimà parodo ar ji yra rezervuota renginyje ar ne
 		private void button4_Click(object sender, EventArgs e)
 		{
@@ -181,8 +180,14 @@ namespace WinFormsApp1
 			{
 				try
 				{
-					if (SeatReservationCalls.FindSeat(Convert.ToInt32(listView7.SelectedItems[0].SubItems[1].Text), textBox1.Text) == 1) MessageBox.Show("Vieta yra rezervuota");
-					else MessageBox.Show("Vieta nëra rezervuota");
+					int hallid = EventCalls.GetHallID(Convert.ToInt32(listView7.SelectedItems[0].SubItems[1].Text));
+					ParsingFunctions.ParseSeat(textBox1.Text, out string groupname, out int row, out char rowletter, out int number, out char numberletter);
+					int groupid = HallGroupCalls.GetGroupID(groupname, hallid);
+					int seatid = HallSeatCalls.FindSeatID(groupid, row, rowletter, number, numberletter);
+					int reserved;
+					if ((reserved = SeatReservationCalls.Exists(seatid, Convert.ToInt32(listView7.SelectedItems[0].SubItems[1].Text))) == 1) MessageBox.Show("Vieta yra rezervuota");
+					else if(reserved==0) MessageBox.Show("Vieta nëra rezervuota");
+					else MessageBox.Show("Vietos nëra renginyje");
 				}
 				catch
 				{
@@ -192,7 +197,7 @@ namespace WinFormsApp1
 			else MessageBox.Show("Patikrinkite ar teisingai viskà suvedëte");
 		}
 		//Atnaujina saliø sàraðà vietø pridëjimo lange
-		internal void UpdateHallList()
+		internal void UpdateEventList()
 		{
 			List<Event> events = EventCalls.GetEvents();
 			DXPopupMenu popupMenu = new DXPopupMenu();
@@ -217,6 +222,47 @@ namespace WinFormsApp1
 			gridView1.Columns.Clear();
 			eventh = (DXMenuItem)sender;
 			UpdateGroupList(Convert.ToInt32(((DXMenuItem)sender).Tag));
+		}
+		internal void UpdateEventList1()
+		{
+			List<Event> events = EventCalls.GetEvents();
+			DXPopupMenu popupMenu = new DXPopupMenu();
+			popupMenu.Items.Add(new DXMenuItem() { Caption = "Pasirinkite renginá", Tag = "-1" });
+			foreach (Event eventh in events)
+			{
+				popupMenu.Items.Add(new DXMenuItem() { Caption = eventh.Name, Tag = eventh.EventId });
+			}
+			dropDownButton3.DropDownControl = popupMenu;
+			foreach (DXMenuItem item in popupMenu.Items)
+			{
+
+				item.Click += item_Click2;
+			}
+			dropDownButton3.Text = popupMenu.Items[0].Caption;
+
+		}
+		//Kai paspaudþiama ant salës pavadinimo atnaujina jos grupiø sàraðà
+		internal void item_Click2(object sender, EventArgs e)
+		{
+			dropDownButton3.Text = ((DXMenuItem)sender).Caption;
+			gridView2.Columns.Clear();
+			eventh = (DXMenuItem)sender;
+			DataTable table = new DataTable();
+			table.Columns.Add("Grupë");
+			table.Columns.Add("Vieta");
+			table.Columns.Add("Kaina");
+			RepositoryItemComboBox box = new RepositoryItemComboBox();
+			List<string> groups = HallGroupCalls.GetDistinctGroupsByEvent(Convert.ToInt32(eventh.Tag));
+			for (int i = 0; i < groups.Count; i++)
+				box.Items.Add(groups[i]);
+			gridControl2.RepositoryItems.Add(box);
+			HelperFunctions.AddRow(table, Convert.ToInt32(eventh.Tag));
+			//groupname - row, rowletter, number, numberletter, price
+			gridView2.GridControl.DataSource = table;
+			dataTable = table.Copy();
+			gridView2.Columns[0].ColumnEdit = box;
+			//gridView2.Columns[0].OptionsColumn.AllowEdit = false;
+			//UpdateGroupList(Convert.ToInt32(((DXMenuItem)sender).Tag));
 		}
 		//Atnaujina grupiø sàraðà vietø pridëjimo lange
 		internal void UpdateGroupList(int eventid)
@@ -279,21 +325,125 @@ namespace WinFormsApp1
 			DataRow datarow = gridView1.GetFocusedDataRow();
 			string rowname = datarow[0].ToString();
 			ParsingFunctions.ParseNumberLetter(rowname, out int row, out char rowletter);
-			double price;
-			try
-			{
-				price = Convert.ToDouble(datarow[name]);
-			}
-			catch { MessageBox.Show("Patikrinkite ar viskas ávesta teisingai"); return; }
 			int seatid;
-			if ((seatid = HallSeatCalls.FindSeatID(Convert.ToInt32(group.Tag), row, rowletter, number, numberletter)) < 0)
+			double price;
+			seatid = HallSeatCalls.FindSeatID(Convert.ToInt32(group.Tag), row, rowletter, number, numberletter);
+			if (datarow[name] != string.Empty)
 			{
-				HallSeatCalls.InsertHallSeat(Convert.ToInt32(group.Tag), " ", row, rowletter, number, numberletter, price, Convert.ToInt32(eventh.Tag));//to be set when i figure out the color stuff
-				seatid = HallSeatCalls.FindSeatID(Convert.ToInt32(group.Tag), row, rowletter, number, numberletter);
-				SeatReservationCalls.AddReservation(Convert.ToInt32(eventh.Tag), seatid, 0, DateTime.Now, price);
+				try { price = Convert.ToDouble(datarow[name]); }
+				catch { MessageBox.Show("Ávestas ne skaièius"); return; }
+
+				if (seatid < 0)
+				{
+					string color = " ";
+					if (price >= 0 && price < 20) { color = "Red"; }
+					else if (price >= 20 && price < 50) { color = "BurlyWood"; }
+					else if (price >= 50) { color = "FireBrick"; }
+					HallSeatCalls.InsertHallSeat(Convert.ToInt32(group.Tag), color, row, rowletter, number, numberletter, price, Convert.ToInt32(eventh.Tag));//to be set when i figure out the color stuff
+					seatid = HallSeatCalls.FindSeatID(Convert.ToInt32(group.Tag), row, rowletter, number, numberletter);
+					SeatReservationCalls.AddReservation(Convert.ToInt32(eventh.Tag), seatid, 0, DateTime.Now, price);
+				}
+				else if (seatid > 0 && SeatReservationCalls.Exists(seatid, Convert.ToInt32(eventh.Tag))>=0) HallSeatCalls.UpdatePrice(seatid, price, Convert.ToInt32(eventh.Tag));//seat and reservation exists
+				else if (seatid > 0 && SeatReservationCalls.Exists(seatid, Convert.ToInt32(eventh.Tag))<0) SeatReservationCalls.AddReservation(Convert.ToInt32(eventh.Tag), seatid, 0, DateTime.Now, price);//seat exists reserved doesnt
 			}
-			else HallSeatCalls.UpdatePrice(seatid, price, Convert.ToInt32(eventh.Tag));
+			else if (seatid > 0)
+			{
+				SeatReservationCalls.DeleteReservation(Convert.ToInt32(eventh.Tag), seatid);
+			}
 			this.gridView1.UpdateCurrentRow();
+		}
+		private void GridView2_CellValueChanged(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
+		{
+			this.gridView2.CloseEditor();
+			DataRow datarow = gridView2.GetFocusedDataRow();
+			if (datarow[0].ToString() != string.Empty && datarow[1].ToString() != string.Empty && datarow[2].ToString() != string.Empty)
+			{
+				RepositoryItemComboBox box = gridControl2.RepositoryItems[0] as RepositoryItemComboBox;
+				double price;
+				if (box.Items.Contains(datarow[0].ToString()) && double.TryParse(datarow[2].ToString(), out price))
+				{
+					var r = new Regex("^\\d+[ ]\\d+$");
+					var a = new Regex("^\\d+[-].[ ]\\d+$");
+					var b = new Regex("^\\d+[ ]\\d+[-].$");
+					var l = new Regex("^\\d+[-].[ ]\\d+[-].$");
+					if (r.IsMatch(datarow[1].ToString()) || a.IsMatch(datarow[1].ToString()) || b.IsMatch(datarow[1].ToString()) || l.IsMatch(datarow[1].ToString()))
+					{
+						DataRow oldData = dataTable.Rows[gridView2.GetFocusedDataSourceRowIndex()];
+
+						if (oldData[0].ToString() != string.Empty && oldData[1].ToString() != string.Empty && oldData[2].ToString() != string.Empty)
+						{
+							ParsingFunctions.ParseSeat(oldData[1].ToString(), out int oldrow, out char oldrowletter, out int oldnumber, out char oldnumberletter);
+							ParsingFunctions.ParseSeat(datarow[1].ToString(), out int row, out char rowletter, out int number, out char numberletter);
+							int hallid = EventCalls.GetHallID(Convert.ToInt32(eventh.Tag));
+							int groupid = HallGroupCalls.GetGroupID(oldData[0].ToString(), hallid);
+							string color = " ";
+							if (price >= 0 && price < 20) { color = "Red"; }
+							else if (price >= 20 && price < 50) { color = "BurlyWood"; }
+							else if (price >= 50) { color = "FireBrick"; }
+							int seatid = HallSeatCalls.FindSeatID(groupid, oldrow, oldrowletter, oldnumber, oldnumberletter);
+							if ((oldData[0] != datarow[0] || oldData[1] != datarow[1]) && oldData[2] == datarow[2])
+							{
+								string seat = new String(datarow[0].ToString() + " " + datarow[1].ToString());
+								if (SeatReservationCalls.FindSeat(Convert.ToInt32(eventh.Tag), seat) == 0)
+									if (HallSeatCalls.GetSeatExtra(seatid) == Convert.ToInt32(eventh.Tag))
+										HallSeatCalls.UpdateSeat(groupid, row, rowletter, number, numberletter, seatid);//if extra=eventid
+									else
+									{
+										HallSeatCalls.InsertHallSeat(groupid, color, row, rowletter, number, numberletter, price, Convert.ToInt32(eventh.Tag));
+										SeatReservationCalls.DeleteReservation(Convert.ToInt32(eventh.Tag), seatid);
+										seatid = HallSeatCalls.FindSeatID(groupid, row, rowletter, number, numberletter);
+										SeatReservationCalls.AddReservation(Convert.ToInt32(eventh.Tag), seatid, 0, DateTime.Now, price);
+									}
+								//else insert seat, remove old reservation
+								else MessageBox.Show("Vieta jau egzistuoja");
+							}
+							else if (oldData[0] == datarow[0] && oldData[1] == datarow[1] && oldData[2] != datarow[2])
+							{
+								HallSeatCalls.UpdatePrice(seatid, price, Convert.ToInt32(eventh.Tag));
+							}
+							else
+							{
+								string seat = new String(datarow[0].ToString() + " " + datarow[1].ToString());
+								if (SeatReservationCalls.FindSeat(Convert.ToInt32(eventh.Tag), seat) == 0)
+								{
+									if (HallSeatCalls.GetSeatExtra(seatid) == Convert.ToInt32(eventh.Tag))
+										HallSeatCalls.UpdateSeat(groupid, row, rowletter, number, numberletter, seatid);//if extra=eventid
+									else
+									{
+										HallSeatCalls.InsertHallSeat(groupid, color, row, rowletter, number, numberletter, price, Convert.ToInt32(eventh.Tag));
+										SeatReservationCalls.DeleteReservation(Convert.ToInt32(eventh.Tag), seatid);
+										seatid = HallSeatCalls.FindSeatID(groupid, row, rowletter, number, numberletter);
+										SeatReservationCalls.AddReservation(Convert.ToInt32(eventh.Tag), seatid, 0, DateTime.Now, price);
+									}
+								}
+								else MessageBox.Show("Vieta jau egzistuoja");
+							}
+						}
+						else
+						{
+							string seat = new String(datarow[0].ToString() + " " + datarow[1].ToString());
+							if (SeatReservationCalls.FindSeat(Convert.ToInt32(eventh.Tag), seat) == 0)
+							{
+								ParsingFunctions.ParseSeat(datarow[1].ToString(), out int row, out char rowletter, out int number, out char numberletter);
+								int hallid = EventCalls.GetHallID(Convert.ToInt32(eventh.Tag));
+								int groupid = HallGroupCalls.GetGroupID(datarow[0].ToString(), hallid);
+								string color = " ";
+								if (price >= 0 && price < 20) { color = "Red"; }
+								else if (price >= 20 && price < 50) { color = "BurlyWood"; }
+								else if (price >= 50) { color = "FireBrick"; }
+								HallSeatCalls.InsertHallSeat(groupid, color, row, rowletter, number, numberletter, price, Convert.ToInt32(eventh.Tag));
+								int seatid = HallSeatCalls.FindSeatID(groupid, row, rowletter, number, numberletter);
+								SeatReservationCalls.AddReservation(Convert.ToInt32(eventh.Tag), seatid, 0, DateTime.Now, price);
+
+							}
+							else MessageBox.Show("Vieta jau egzistuoja");
+						}
+						DataTable table = gridControl2.DataSource as DataTable;
+						dataTable = table.Copy();
+						table.Rows.Add();
+					}
+				}
+			}
 		}
 		internal void HideUnusedControls(DevExpress.XtraScheduler.UI.AppointmentForm form)
 		{
@@ -310,7 +460,7 @@ namespace WinFormsApp1
 			form.Controls[0].Controls.RemoveAt(2);
 			form.Controls[0].Controls.RemoveAt(2);
 			form.Controls[0].Controls.RemoveAt(2);
-			form.Controls[0].Controls[2].Visible= false;
+			form.Controls[0].Controls[2].Visible = false;
 		}
 	}
 }

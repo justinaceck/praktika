@@ -88,6 +88,29 @@ namespace WinFormsApp1.Database
 				return ParsingFunctions.ParseReadGroups(reader);
 			}
 		}
+		internal static List<string> GetDistinctGroupsByEvent(int eventid)
+		{
+			SqlCommand select = new SqlCommand("GetDistinctGroupsByEventID", myConnection);
+			select.CommandType = System.Data.CommandType.StoredProcedure;
+			select.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
+			select.Parameters["@eventid"].Value = eventid;
+			IAsyncResult result = select.BeginExecuteReader();
+			int count = 0;
+			while (!result.IsCompleted)
+			{
+				count += 1;
+				Debug.WriteLine("Waiting ({0})", count);
+			}
+            List<string> list = new List<string>();
+			using (SqlDataReader reader = select.EndExecuteReader(result))
+			{
+                while (reader.Read())
+                {
+                    list.Add(reader.GetString(0));
+                }
+			}
+            return list;
+		}
 		//Gražina grupės id pagal grupės pavadinimą ir salės id
 		internal static int GetGroupID(string groupname, int hallid)
         {

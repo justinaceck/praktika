@@ -34,8 +34,8 @@ namespace WinFormsApp1.Database
                 Debug.WriteLine("Failed: ", ex.ToString());
             }
         }
-        //Patikrina ar vieta rezervuota renginyje(nenaudojama)
-        internal static bool IsReserved(int seatid, int eventid)
+        //Patikrina ar vieta rezervuota renginyje
+        internal static int Exists(int seatid, int eventid)
         {
             SqlCommand select = new SqlCommand("IsReserved", myConnection);
             select.CommandType = System.Data.CommandType.StoredProcedure;
@@ -53,15 +53,14 @@ namespace WinFormsApp1.Database
 
             using (SqlDataReader reader = select.EndExecuteReader(result))
             {
-                    reader.Read();
+                    
                 try
                 {
-                    if (Convert.ToInt32(reader.GetValue(0)) == 1)
-                    return true;
-                    else
-                    return false;
-                }
-                catch { return false; }
+					reader.Read();
+                    
+                    return Convert.ToInt32(reader.GetValue(0));
+				}
+                catch { return -1; }
             }
         }
         //Sukuria naują vietos rezervaciją
@@ -124,10 +123,39 @@ namespace WinFormsApp1.Database
             using (SqlDataReader reader = select.EndExecuteReader(result))
             {
                 reader.Read();
-                if (reader.GetValue(0) == DBNull.Value) return 0;
-                else return Convert.ToInt32(reader.GetValue(0));
+                try
+                {
+                    if (reader.GetValue(0) == DBNull.Value) return 0;
+                    else return Convert.ToInt32(reader.GetValue(0));
+                }
+                catch { return 0; }
             }
         }
+		internal static void GetReserved(out List<int> ids, out List<DateTime> times, out List<string> names)
+		{
+			SqlCommand select = new SqlCommand("GetReserved", myConnection);
+			IAsyncResult result = select.BeginExecuteReader();
+			int count = 0;
+			while (!result.IsCompleted)
+			{
+				count += 1;
+				Debug.WriteLine("Waiting ({0})", count);
+			}
 
-    }
+			using (SqlDataReader reader = select.EndExecuteReader(result))
+			{
+                ParsingFunctions.ParseReserved(reader, out ids, out times, out names);
+			}
+		}
+		internal static void DeleteReservation(int eventid, int seatid)
+		{
+			SqlCommand select = new SqlCommand("DeleteSeat", myConnection);
+			select.CommandType = System.Data.CommandType.StoredProcedure;
+			select.Parameters.Add("@seatid", System.Data.SqlDbType.Int);
+			select.Parameters["@seatid"].Value = seatid;
+			select.Parameters.Add("@eventid", System.Data.SqlDbType.Int);
+			select.Parameters["@eventid"].Value = eventid;
+			select.ExecuteNonQuery();
+		}
+	}
 }
